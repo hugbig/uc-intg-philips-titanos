@@ -1,0 +1,44 @@
+{
+  "driver_id": "philips_titanos_oled",
+  "version": "1.0.0",
+  "min_core_api": "0.22.0",
+  "name": {
+    "en": "Philips Titan OS TV"
+  },
+  "icon": "custom:titanos_entite.png",
+  "description": {
+    "en": "Direct local-network control for Philips Titan OS televisions using JointSpace API 6."
+  },
+  "developer": {
+    "name": "hugbig",
+    "email": "hugbig@users.noreply.github.com",
+    "url": "https://github.com/hugbig"
+  },
+  "home_page": "https://github.com/hugbig/uc-intg-philips-titanos",
+  "documentation": "https://github.com/hugbig/uc-intg-philips-titanos/blob/main/README.md",
+  "release_date": "2026-11-19",
+  "setup_data_schema": {
+    "title": {
+      "en": "Philips TV Configuration"
+    },
+    "description": {
+      "en": "Philips TV configuration flow"
+    },
+    "settings": [
+      {
+        "id": "info",
+        "label": {
+          "en": "Connect to Philips TV"
+        },
+        "field": {
+          "label": {
+            "value": {
+              "en": "Enter the TV IP address, MAC address and display name. A PIN will be displayed on the TV."
+            }
+          }
+        }
+      }
+    ]
+  },
+  "device_discovery": false
+}

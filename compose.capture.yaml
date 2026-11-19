@@ -1,0 +1,97 @@
+# Capture the traffic of the "Philips Smart TV" app with mitmproxy.
+#
+# Without TV: docker compose -f compose.capture.yaml up
+#            (mitmproxy relays to the repo's fake TV)
+# With TV   : UPSTREAM_HTTP=http://IP_TV:1925 UPSTREAM_HTTPS=https://IP_TV:1926 \
+#              docker compose -f compose.capture.yaml up mitmweb
+# Ports seen: PHONE_IP=192.168.1.23 docker compose -f compose.capture.yaml run --rm tcpdump
+#
+# Web interface: http://MACHINE_IP:8081 ; random token shown in the mitmweb logs
+#                (or a password chosen via MITM_PASSWORD).
+# Captures are saved in ./exploration/capture (ignored by git).
+
+services:
+  fake-tv:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: uc-philips-titanos-dev
+    # GET responses mimicking a real TV; to change them without touching the repo:
+    #   cp tests/fixtures/titan_routes.json exploration/capture/routes.json
+    #   FAKE_TV_ROUTES=exploration/capture/routes.json docker compose -f compose.capture.yaml up -d
+    command:
+      - python
+      - -m
+      - tests.fake_tv
+      - --port
+      - "19250"
+      - --routes-json
+      - /app/${FAKE_TV_ROUTES:-tests/fixtures/titan_routes.json}
+    volumes:
+      - .:/app:ro
+    networks:
+      default:
+        # Distinct name for the port 1926 target: in mitmweb, the request host tells
+        # which port the app arrived on (fake-tv = 1925 HTTP, fake-tv-https = 1926 HTTPS).
+        aliases: [fake-tv-https]
+
+  mitmweb:
+    image: mitmproxy/mitmproxy:12.2.1
+    environment:
+      PYTHONUNBUFFERED: "1"   # logs visible immediately in `docker compose logs`
+    # The image entrypoint takes the UID of the mounted folder's owner: files it creates
+    # (captures, mitmproxy certificate authority) belong to the host user.
+    # It fails if that owner's group does not exist in the image: create it first.
+    entrypoint:
+      - sh
+      - -c
+      - groupadd -o -g "$$(stat -c %g /home/mitmproxy/.mitmproxy)" hote 2>/dev/null; exec docker-entrypoint.sh "$$@"
+      - --
+    command:
+      - mitmweb
+      - --mode
+      - reverse:${UPSTREAM_HTTP:-http://fake-tv:19250}@1925
+      - --mode
+      - reverse:${UPSTREAM_HTTPS:-http://fake-tv-https:19250}@1926
+      - --ssl-insecure
+      - --web-host=0.0.0.0
+      - --web-port=8081
+      - --no-web-open-browser
+      # Without MITM_PASSWORD, mitmweb generates a random token (full URL in its logs).
+      - --set
+      - web_password=${MITM_PASSWORD:-}
+      # One file per day, appended to (+) on each start.
+      - --set
+      - save_stream_file=+/home/mitmproxy/.mitmproxy/capture-%Y%m%d.mitm
+    ports:
+      - "1925:1925"
+      - "1926:1926"
+      - "${MITM_WEB_PORT:-8081}:8081"
+    volumes:
+      - ./exploration/capture:/home/mitmproxy/.mitmproxy
+
+  tcpdump:
+    image: alpine:3.20
+    profiles: ["tools"]
+    network_mode: host
+    cap_add: [NET_ADMIN, NET_RAW]
+    environment:
+      PHONE_IP: ${PHONE_IP:-}
+    command:
+      - sh
+      - -c
+      - >-
+        [ -n "$$PHONE_IP" ] || { echo "set PHONE_IP (phone IP)"; exit 1; } &&
+        apk add -q --no-cache tcpdump &&
+        exec tcpdump -nni any "src host $$PHONE_IP and (tcp[tcpflags] & tcp-syn != 0 or udp)"
+
+  # Convert the captures to text: docker compose -f compose.capture.yaml run --rm lire > exploration/capture/capture.txt
+  lire:
+    image: mitmproxy/mitmproxy:12.2.1
+    profiles: ["tools"]
+    entrypoint:
+      - sh
+      - -c
+      - for f in /capture/*.mitm; do echo "=== $$f"; mitmdump -nr "$$f" --flow-detail 3 --set confdir=/tmp; done
+    volumes:
+      - ./exploration/capture:/capture:ro

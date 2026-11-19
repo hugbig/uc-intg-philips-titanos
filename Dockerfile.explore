@@ -1,0 +1,6 @@
+# Run the exploration tool on the machine on the TV's local network.
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt requirements-explore.txt ./
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-explore.txt
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/app:/app/tools

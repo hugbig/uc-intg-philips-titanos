@@ -1,0 +1,19 @@
+# TV exploration session (D-day), to run on a machine on the TV's local network:
+#   docker compose -f compose.explore.yaml run --rm explore --host <TV IP> --mac <MAC>
+name: uc-philips-titanos-explore
+
+services:
+  explore:
+    build:
+      context: .
+      dockerfile: Dockerfile.explore
+    image: uc-philips-titanos-explore
+    network_mode: host        # Wake-on-LAN and direct access to the TV (no port opened)
+    user: "${DEV_UID:-1000}:${DEV_GID:-1000}"  # files written as your user (see .env)
+    environment:
+      HOME: /tmp
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app                # the report and credentials are written to ./exploration (gitignored)
+    entrypoint: ["python", "-m", "titan_explore"]

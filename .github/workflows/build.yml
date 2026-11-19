@@ -1,0 +1,169 @@
+name: "Build and release Philips Titan OS package"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      # Feature branches: test package as an artifact, never a release.
+      - "*_HBI_*"
+
+permissions:
+  contents: write
+
+env:
+  PYTHON_VER: 3.11.12-0.3.0
+
+concurrency:
+  group: philips-titanos-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Read manifest and determine release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="$(jq -r '.version' driver.json)"
+          DRIVER_ID="$(jq -r '.driver_id' driver.json)"
+          TAG="v${VERSION}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "DRIVER_ID=$DRIVER_ID" >> "$GITHUB_ENV"
+          echo "RELEASE_TAG=$TAG" >> "$GITHUB_ENV"
+          echo "ARTIFACT_NAME=uc-intg-${DRIVER_ID}-${VERSION}-aarch64" >> "$GITHUB_ENV"
+
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "RELEASE_EXISTS=true" >> "$GITHUB_ENV"
+            echo "Release $TAG already exists; build will still be validated."
+          else
+            echo "RELEASE_EXISTS=false" >> "$GITHUB_ENV"
+            echo "Release $TAG will be created after a successful build."
+          fi
+
+      - name: Set up Python for tests
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run unit tests
+        shell: bash
+        run: |
+          python3 -m pip install --quiet -r requirements-dev.txt
+          python3 -m pytest -q
+
+      - name: Build AArch64 driver
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-arm binfmt-support qemu-user-static
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          docker run --rm \
+            --platform=aarch64 \
+            --user=$(id -u):$(id -g) \
+            -v "${GITHUB_WORKSPACE}:/workspace" \
+            docker.io/unfoldedcircle/r2-pyinstaller:${PYTHON_VER} \
+            bash -c "cd /workspace && \
+              python -m pip install -r requirements.txt && \
+              pyinstaller --clean --onedir --name intg-${DRIVER_ID} \
+                --collect-all ucapi \
+                --collect-all ucapi_framework \
+                --collect-all zeroconf \
+                intg_philips_titanos/__main__.py"
+
+      - name: Prepare package
+        shell: bash
+        run: |
+          rm -rf artifacts
+          mkdir -p artifacts/bin
+          mv "dist/intg-${DRIVER_ID}/"* artifacts/bin/
+          mv "artifacts/bin/intg-${DRIVER_ID}" artifacts/bin/driver
+          chmod 755 artifacts/bin/driver
+          cp driver.json artifacts/
+          cp assets/titanos_entite.png artifacts/
+
+      - name: Validate
+        shell: bash
+        run: |
+          test -f artifacts/driver.json
+          python - <<'PY'
+          import struct
+          from pathlib import Path
+          for name in ("titanos_entite.png",):
+              logo = Path("artifacts") / name
+              with logo.open("rb") as file:
+                  signature = file.read(8)
+                  if signature != b"\x89PNG\r\n\x1a\n":
+                      raise SystemExit(f"{name} is not a valid PNG")
+                  length = struct.unpack(">I", file.read(4))[0]
+                  chunk = file.read(4)
+                  if chunk != b"IHDR" or length < 8:
+                      raise SystemExit(f"{name} has no valid IHDR chunk")
+                  width, height = struct.unpack(">II", file.read(8))
+              if (width, height) != (90, 90):
+                  raise SystemExit(f"{name} must be 90x90, got {width}x{height}")
+              print(f"{name} validated: {width}x{height}")
+          PY
+          test -x artifacts/bin/driver
+          test ! -e artifacts/bin/_internal/driver.json
+          python -m compileall -q intg_philips_titanos
+          jq -e --arg v "$VERSION" '.version == $v' artifacts/driver.json >/dev/null
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          manifest = json.loads(Path("driver.json").read_text(encoding="utf-8"))
+          driver = Path("intg_philips_titanos/driver.py").read_text(encoding="utf-8")
+          assert f'driver_id="{manifest["driver_id"]}"' in driver, "driver_id differs between driver.json and driver.py"
+          entity = Path("intg_philips_titanos/remote.py").read_text(encoding="utf-8")
+          assert "custom:titanos_entite.png" in entity
+          assert '"custom:titanos_entite.png"' in Path("driver.json").read_text(encoding="utf-8")
+          commands = Path("intg_philips_titanos/commands.py").read_text(encoding="utf-8")
+          assert '"SETTINGS": "QuickMenu"' in commands
+          ambilight = Path("intg_philips_titanos/ambilight.py").read_text(encoding="utf-8")
+          assert '"AMBI_OFF": AmbiAction(False, STYLE_OFF)' in ambilight
+          print("Entity icon, driver_id, keys and Ambilight commands validated")
+          PY
+
+      - name: Create Remote 3 archive
+        shell: bash
+        run: |
+          cd artifacts
+          tar czf "../${ARTIFACT_NAME}.tar.gz" ./titanos_entite.png ./driver.json ./bin/
+          cd ..
+          tar tzf "${ARTIFACT_NAME}.tar.gz" | sed -n '1,30p'
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_NAME }}.tar.gz
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Create GitHub Release automatically
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.RELEASE_EXISTS == 'false'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$RELEASE_TAG" \
+            "${ARTIFACT_NAME}.tar.gz" \
+            --target "$GITHUB_SHA" \
+            --title "Philips Titan OS ${RELEASE_TAG}" \
+            --generate-notes \
+            --latest \
+            --repo "$GITHUB_REPOSITORY"
+
+      - name: Existing release notice
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.RELEASE_EXISTS == 'true'
+        shell: bash
+        run: |
+          echo "Release ${RELEASE_TAG} already exists."
+          echo "Increase driver.json version before the next release."

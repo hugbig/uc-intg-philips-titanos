@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.dev-config/
+.venv/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+exploration/
+.superpowers/
+.env
+
+# Design notes and plans (local only)
+docs/

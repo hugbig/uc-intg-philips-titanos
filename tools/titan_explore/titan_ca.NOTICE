@@ -1,0 +1,7 @@
+titan_ca.crt — "Titanos Root CA" root certificate (O=TitanOS, Barcelona), valid from 2024-11-18
+to 2046-10-14, SHA-256 BC:91:11:1A:19:E8:21:6E:14:59:58:2C:CC:97:74:55:74:FC:7C:5F:85:8C:DE:54:AA:1B:7C:26:C8:0D:DE:DA.
+
+Copied from https://github.com/bedirhanyildirim/philips-titan-os-55pml9019-remote
+(philipstv/titan_ca.crt), Copyright (c) 2026 Bedirhan Yıldırım, MIT license.
+The fingerprint was checked against the one published in docs/TITAN_OS_API.md of the same repository.
+It is used to verify the certificate of the TV's MQTT broker (port 8883).

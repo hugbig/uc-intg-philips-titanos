@@ -1,0 +1,6 @@
+# Development environment: the code is mounted as a volume on /app.
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt requirements-dev.txt requirements-explore.txt ./
+RUN pip install --no-cache-dir -r requirements-dev.txt
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
