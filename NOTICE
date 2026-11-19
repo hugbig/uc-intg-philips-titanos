@@ -1,0 +1,6 @@
+Third-party parts
+
+- tools/titan_explore/mqtt.py and tools/titan_explore/titan_ca.crt are based on
+  https://github.com/bedirhanyildirim/philips-titan-os-55pml9019-remote,
+  Copyright (c) 2026 Bedirhan Yildirim, MIT license
+  (see tools/titan_explore/titan_ca.NOTICE).

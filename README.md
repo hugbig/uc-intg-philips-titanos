@@ -177,4 +177,4 @@ See [CHANGELOG.md](CHANGELOG.md) for the version history.
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE). Third-party parts are listed in [NOTICE](NOTICE).
