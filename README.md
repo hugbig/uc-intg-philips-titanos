@@ -1,4 +1,17 @@
-# Philips Titan OS TV for Unfolded Circle Remote 3
+<p align="center">
+  <img src="assets/titanos_entite.png" alt="Philips Titan OS integration icon" width="90" height="90">
+</p>
+
+<h1 align="center">Philips Titan OS TV for Unfolded Circle Remote 3</h1>
+
+<p align="center">
+  <a href="https://github.com/hugbig/uc-intg-philips-titanos/actions/workflows/tests.yml"><img src="https://github.com/hugbig/uc-intg-philips-titanos/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
+  <a href="https://github.com/hugbig/uc-intg-philips-titanos/actions/workflows/build.yml"><img src="https://github.com/hugbig/uc-intg-philips-titanos/actions/workflows/build.yml/badge.svg" alt="Build"></a>
+  <a href="https://github.com/hugbig/uc-intg-philips-titanos/releases/latest"><img src="https://img.shields.io/github/v/release/hugbig/uc-intg-philips-titanos" alt="Latest release"></a>
+  <a href="https://github.com/hugbig/uc-intg-philips-titanos/releases"><img src="https://img.shields.io/github/downloads/hugbig/uc-intg-philips-titanos/total" alt="Downloads"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/hugbig/uc-intg-philips-titanos" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/python-3.11-blue" alt="Python 3.11">
+</p>
 
 Control a Philips TV running **Titan OS** from an Unfolded Circle Remote 3, directly over the local
 network (JointSpace API 6). There is no cloud service and no extra hub.

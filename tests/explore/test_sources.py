@@ -36,7 +36,7 @@ async def test_no_confirm_without_explicit_yes(make_session, fake_tv):
 async def test_wrong_highlight_never_validates(make_session, fake_tv):
     answers = _intro()
     for _ in HDMI_BOTTOM_UP:
-        answers += ["Screen mirroring"]  # mauvaise ligne : aucune question de validation
+        answers += ["Screen mirroring"]  # wrong row: no confirmation question
     answers += ["no"]
     _, session = make_session(*answers)
     await step_sources(session)

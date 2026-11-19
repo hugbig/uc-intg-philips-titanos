@@ -1,5 +1,5 @@
-# Environnement de dev : tests, lint, driver, faux serveur Titan et simulateur Remote.
-# Usage : docker compose -f compose.dev.yaml run --rm tests
+# Dev environment: tests, lint, driver, fake Titan server and Remote simulator.
+# Usage: docker compose -f compose.dev.yaml run --rm tests
 x-dev: &dev
   build:
     context: .
