@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **License changed from MIT to the Mozilla Public License 2.0.** Versions up to 1.1.0 remain
+  available under the MIT license. The third-party files listed in `NOTICE` keep their MIT license.
+- README: requirements, command table, troubleshooting and support sections.
+
 ## 1.1.0 — New integration id
 
 - **Integration id renamed** from `philips_titanos_oled` to `philips_titanos_ambilight`. The Remote

@@ -1,3 +1,10 @@
+uc-intg-philips-titanos
+Copyright (c) 2026 hugbig
+
+Licensed under the Mozilla Public License 2.0 (see LICENSE), except for the
+third-party parts below. Versions up to and including 1.1.0 were released under
+the MIT license.
+
 Third-party parts
 
 - tools/titan_explore/mqtt.py and tools/titan_explore/titan_ca.crt are based on

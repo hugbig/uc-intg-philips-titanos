@@ -9,7 +9,7 @@
   <a href="https://github.com/hugbig/uc-intg-philips-titanos/actions/workflows/build.yml"><img src="https://github.com/hugbig/uc-intg-philips-titanos/actions/workflows/build.yml/badge.svg" alt="Build"></a>
   <a href="https://github.com/hugbig/uc-intg-philips-titanos/releases/latest"><img src="https://img.shields.io/github/v/release/hugbig/uc-intg-philips-titanos" alt="Latest release"></a>
   <a href="https://github.com/hugbig/uc-intg-philips-titanos/releases"><img src="https://img.shields.io/github/downloads/hugbig/uc-intg-philips-titanos/total" alt="Downloads"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/hugbig/uc-intg-philips-titanos" alt="License: MIT"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/hugbig/uc-intg-philips-titanos" alt="License: MPL-2.0"></a>
   <img src="https://img.shields.io/badge/python-3.11-blue" alt="Python 3.11">
 </p>
 
@@ -231,4 +231,5 @@ See [CHANGELOG.md](CHANGELOG.md) for the version history.
 
 ## License
 
-MIT, see [LICENSE](LICENSE). Third-party parts are listed in [NOTICE](NOTICE).
+[Mozilla Public License 2.0](LICENSE). Versions up to 1.1.0 were released under the MIT license.
+Third-party parts, which keep their MIT license, are listed in [NOTICE](NOTICE).
