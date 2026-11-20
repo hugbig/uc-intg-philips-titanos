@@ -51,3 +51,16 @@ def test_custom_icon_is_packaged():
     assert struct.unpack(">II", data[16:24]) == (90, 90)
     assert "cp assets/titanos_entite.png artifacts/" in workflow
     assert "./titanos_entite.png" in archive
+
+
+def test_build_runs_automatically_on_main_only():
+    """Feature branches are built on demand (workflow_dispatch), never on every push."""
+    import re
+
+    workflow = (MANIFEST.parent / ".github/workflows/build.yml").read_text()
+    triggers = workflow.split("\npermissions:")[0]
+    assert re.search(r"^  workflow_dispatch:", triggers, re.M)
+    push = re.search(r"^  push:\n((?:    .*\n|      .*\n)*)", triggers, re.M)
+    assert push is not None
+    branches = re.findall(r"^\s+- (\S+)", push.group(1), re.M)
+    assert branches == ["main"]

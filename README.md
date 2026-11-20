@@ -191,8 +191,9 @@ the fake TV receives, run `docker compose -f compose.dev.yaml logs -f fake-tv`.
 
 GitHub Actions builds the aarch64 package with PyInstaller:
 
-- on feature branches, it is a test artifact only;
-- on `main`, it publishes a release when the version in `driver.json` is new.
+- on every push to `main`, it publishes a release when the version in `driver.json` is new;
+- on any other branch, only when started by hand ("Run workflow" in the Actions tab), and the
+  package is a test artifact, never a release.
 
 ### Exploring a new TV
 
