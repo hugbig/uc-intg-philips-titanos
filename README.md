@@ -65,6 +65,16 @@ These were tested on a 65OLED851 and left out because the TV does not support th
 
 Other Titan OS models (2024 and later) probably work too. Reports are welcome.
 
+## Requirements
+
+- An Unfolded Circle **Remote 3** (core API 0.22.0 or later). The Remote 2 has not been tested.
+- The TV and the Remote on the **same local network**.
+- A **fixed IP address** for the TV (a DHCP reservation on your router is enough). The integration
+  stores the IP given during setup.
+- To switch the TV on from deep standby: the TV's network wake-up option enabled in its network
+  settings ("Wake on LAN" over Ethernet, or "Switch on with Wi-Fi" / WoWLAN over Wi-Fi; the exact
+  label may vary), and the MAC address of the interface the TV actually uses.
+
 ## Installation
 
 1. Download `uc-intg-philips_titanos_ambilight-<version>-aarch64.tar.gz` from the
@@ -82,18 +92,62 @@ must delete the integration, install the new archive, pair again and re-add the 
 your Remote configuration first, because activities that use the entity may need to be fixed
 afterwards. On firmware 2.9.3 or later, use "Update existing driver" instead.
 
-**Tips**
+## Using the integration
 
-- A physical button sends a command to **one** device. In an activity that mixes the TV with a
-  source device (Google TV, console), a good setup is:
-  - arrows, OK, Back, Home and playback go to the source device;
-  - volume and mute go to the TV, whose keys control the amplifier;
-  - a touch block on the activity screen holds the TV-only commands: SETTINGS, OPTIONS, SOURCE,
-    Ambilight, and a small arrow pad for the TV menus.
-- Pages and button mappings are created when the entity is added to the Remote. After an update
-  that changes them, reset the entity's interface on the Remote.
-- After changing the Remote's language, run the device setup again to get pages in the new
-  language.
+The integration creates one **remote entity** per TV, with its own pages (controls, media,
+Ambilight) and a mapping for the Remote's physical buttons. Every command below can also be used
+in activities and macros, with `repeat`, `delay` and `hold`.
+
+| Group | Commands |
+|---|---|
+| Power | `POWER_TOGGLE`, `POWER_ON`, `POWER_OFF` |
+| Navigation | `CURSOR_UP`, `CURSOR_DOWN`, `CURSOR_LEFT`, `CURSOR_RIGHT`, `CURSOR_ENTER`, `BACK`, `HOME` |
+| TV menus | `SETTINGS` (quick settings), `OPTIONS`, `INFO`, `SOURCE`, `TV_EXIT`, `CHANNELS_APP` |
+| Volume | `VOLUME_UP`, `VOLUME_DOWN`, `MUTE` |
+| Channels | `CHANNEL_UP`, `CHANNEL_DOWN` |
+| Playback | `PLAY_PAUSE`, `PLAY`, `PAUSE`, `STOP`, `REWIND`, `FAST_FORWARD`, `PREVIOUS`, `NEXT`, `RECORD` |
+| Ambilight modes | `AMBI_VIDEO_AI`, `AMBI_VIDEO_STD`, `AMBI_SPORT`, `AMBI_CINEMA`, `AMBI_GAME`, `AMBI_LUMINA`, `AMBI_DISCO`, `AMBI_RYTHM`, `AMBI_COLOR`, `AMBI_APP` |
+| Ambilight settings | `AMBI_ON`, `AMBI_OFF`, `AMBILIGHT_TOGGLE` (restores the last mode), `AMBI_BRIGHT_UP`, `AMBI_BRIGHT_DOWN`, `AMBI_SAT_UP`, `AMBI_SAT_DOWN` |
+| Other keys | `RED`, `GREEN`, `YELLOW`, `BLUE`, `DIGIT_0` to `DIGIT_9` (no effect on the 65OLED851) |
+
+With `hold`, only the volume, arrow and channel keys repeat; the other keys are sent once.
+
+**Recommended activity setup.** A physical button sends a command to **one** device. In an
+activity that mixes the TV with a source device (Google TV, console):
+
+- arrows, OK, Back, Home and playback go to the source device;
+- volume and mute go to the TV, whose keys control the amplifier;
+- a touch block on the activity screen holds the TV-only commands: SETTINGS, OPTIONS, SOURCE,
+  Ambilight, and a small arrow pad for the TV menus.
+
+**Pages and language.** Pages and button mappings are created when the entity is added to the
+Remote. After an update that changes them, reset the entity's interface on the Remote. After
+changing the Remote's language, run the device setup again to get pages in the new language.
+
+## Troubleshooting
+
+- **No PIN on the TV during setup.** The TV must be on (not in standby) and reachable at the IP
+  you entered. Check that the Remote and the TV are on the same network.
+- **The TV does not switch on from standby.** Check the network wake-up option and the MAC address
+  (see [Requirements](#requirements)). Over Wi-Fi, the MAC is the one of the Wi-Fi interface, not
+  the Ethernet one.
+- **A second ON/OFF press is ignored.** A press within 2 s of the previous one is treated as a
+  bounce. After a power change, the TV gets 15 s of rest: a new order is held until then, and
+  pressing ON/OFF again cancels it.
+- **The power state is late after a long standby.** While it boots, the TV can stay silent for
+  about 30 s. The entity catches up as soon as the TV answers.
+- **The first command after a pause is slow.** The TV takes about 2 s to accept the first request
+  on a new connection. Later commands are fast.
+- **A press made while the Remote was asleep did nothing.** The Remote may not send presses made
+  while it is waking up from power saving. Press again.
+- **Buttons or pages did not change after an update.** Reset the entity's interface on the Remote
+  (see [Pages and language](#using-the-integration)).
+
+## Support
+
+- Bugs and feature requests: [GitHub Issues](../../issues). Please include the TV model, the Remote
+  firmware version and the integration logs.
+- Questions and discussion: the [Unfolded Circle community forum](https://unfolded.community).
 
 ## Development
 
