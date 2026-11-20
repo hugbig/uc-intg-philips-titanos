@@ -5,6 +5,8 @@
 - **License changed from MIT to the Mozilla Public License 2.0.** Versions up to 1.1.0 remain
   available under the MIT license. The third-party files listed in `NOTICE` keep their MIT license.
 - README: requirements, command table, troubleshooting and support sections.
+- Ambilight icons for activities and buttons (on/off and seven modes) in `assets/ambilight-icons/`,
+  with the script that generates them.
 
 ## 1.1.0 — New integration id
 
