@@ -9,8 +9,8 @@ def test_package_imports():
     from intg_philips_titanos.driver import PhilipsDriver
 
     manifest = json.loads(MANIFEST.read_text())
-    # Final identifier (2026-11-18): distinct from the other integration `philips_titanos`.
-    assert manifest["driver_id"] == "philips_titanos_oled"
+    # Identifier since 1.1.0 (was `philips_titanos_oled`): distinct from the other integration `philips_titanos`.
+    assert manifest["driver_id"] == "philips_titanos_ambilight"
     assert PhilipsDriver().driver_id == manifest["driver_id"]
     assert __version__ == manifest["version"]
 

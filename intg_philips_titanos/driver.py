@@ -20,7 +20,7 @@ class PhilipsDriver(BaseIntegrationDriver[PhilipsDevice, PhilipsConfig]):
             device_class=PhilipsDevice,
             # Remote entity only: the TV reports no title, source or volume for a media player.
             entity_classes=[PhilipsRemote],
-            driver_id="philips_titanos_oled",
+            driver_id="philips_titanos_ambilight",
         )
 
     async def on_r2_enter_standby(self) -> None:

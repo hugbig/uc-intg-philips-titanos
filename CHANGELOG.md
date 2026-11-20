@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0 — New integration id
+
+- **Integration id renamed** from `philips_titanos_oled` to `philips_titanos_ambilight`. The Remote
+  sees it as a new integration: remove the 1.0.0 integration, install this package, pair the TV
+  again and put the entity back in your activities. No functional change.
+
 ## 1.0.0 — First release
 
 Tested on a Philips 65OLED851 (Titan OS, JointSpace API 6). Integration id: `philips_titanos_oled`.

@@ -20,7 +20,7 @@ network (JointSpace API 6). There is no cloud service and no extra hub.
 > Philips, TP Vision, Titan OS, or Unfolded Circle.
 
 It was built from observations of a real TV and of the official Philips app. Its integration id is
-`philips_titanos_oled`, so it can be installed alongside other Philips Titan OS integrations (such
+`philips_titanos_ambilight`, so it can be installed alongside other Philips Titan OS integrations (such
 as `philips_titanos`) without either one overwriting the other.
 
 ## What it does
@@ -67,7 +67,7 @@ Other Titan OS models (2024 and later) probably work too. Reports are welcome.
 
 ## Installation
 
-1. Download `uc-intg-philips_titanos_oled-<version>-aarch64.tar.gz` from the
+1. Download `uc-intg-philips_titanos_ambilight-<version>-aarch64.tar.gz` from the
    [latest release](../../releases/latest). Do not use GitHub's auto-generated "Source code"
    archives.
 2. In the Remote's Web Configurator, open **Integrations**, add a new integration, and upload the

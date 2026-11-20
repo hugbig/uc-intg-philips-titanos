@@ -6,7 +6,7 @@ set -euo pipefail
 
 CORE_URL="${CORE_URL:-http://localhost:8080}"
 CORE_AUTH="${CORE_AUTH:-web-configurator:1234}"
-DRIVER_ID="philips_titanos_oled"
+DRIVER_ID="philips_titanos_ambilight"
 DRIVER_URL="${DRIVER_URL:-ws://${DEV_SUBNET_PREFIX:-172.28.0}.20:9090}"
 # Body built from driver.json (name, version, setup schema...) + the dev driver URL.
 build_body() {
