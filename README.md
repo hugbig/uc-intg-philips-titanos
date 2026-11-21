@@ -19,7 +19,10 @@ network (JointSpace API 6). There is no cloud service and no extra hub.
 > **Unofficial community integration.** It is not affiliated with, endorsed by, or supported by
 > Philips, TP Vision, Titan OS, or Unfolded Circle.
 
-It was built from observations of a real TV and of the official Philips app. Its integration id is
+It was built from observations of a real TV and of the official Philips app: the app's requests
+were captured with mitmproxy, then checked one by one on the TV, so the integration sends the
+same requests as the app (see [Capturing the Philips app with mitmproxy](#capturing-the-philips-app-with-mitmproxy)).
+Its integration id is
 `philips_titanos_ambilight`, so it can be installed alongside other Philips Titan OS integrations (such
 as `philips_titanos`) without either one overwriting the other.
 
@@ -224,6 +227,41 @@ docker compose -f compose.explore.yaml run --rm explore --host <TV IP> --mac <TV
   - `report.md`: summary;
   - `journal.jsonl`: every request;
   - `credentials.json`: pairings, keep it private.
+
+### Capturing the Philips app with mitmproxy
+
+The actions, endpoints and values used by the integration were found by placing
+[mitmproxy](https://mitmproxy.org/) between the phone running the official Philips Smart TV app
+and the TV. The setup is available in [compose.capture.yaml](compose.capture.yaml).
+
+Run it on a Linux machine with Docker that the phone can reach on the local network (a WSL
+machine behind NAT will not do; a VM bridged on the LAN will):
+
+```bash
+UPSTREAM_HTTP=http://<TV IP>:1925 UPSTREAM_HTTPS=https://<TV IP>:1926 \
+  docker compose -f compose.capture.yaml up -d mitmweb
+docker compose -f compose.capture.yaml logs mitmweb | grep -o 'http://[^ ]*token=[^ ]*'
+```
+
+1. Open the web interface at `http://<machine IP>:8081` with the token from the logs (or set your
+   own with `MITM_PASSWORD`).
+2. In the app, add the TV **manually** with the IP of the machine, not the TV's. The PIN shows on
+   the TV.
+3. Do one action at a time in the app and note the order: input, picture mode, Ambilight style,
+   Ambilight off, volume, power off and on…
+4. In mitmweb, each request shows its path, its JSON body and the TV's answer.
+
+What to look for:
+
+| Request | What it gives |
+|---|---|
+| `POST /6/menuitems/settings/update` | the setting id (`Nodeid`) and the value the app sends |
+| `GET /6/menuitems/settings/structure`, `POST /6/strings` | the list of settings and their labels |
+| `GET /6/ambilight/supportedstyles`, `currentconfiguration`, `topology` | Ambilight styles and state |
+| `POST /6/input/key` | the key names |
+| `POST /6/notifychange` | how the app follows the TV's state |
+
+Captures are saved continuously in `exploration/capture/` (not versioned).
 
 ## Credits
 
